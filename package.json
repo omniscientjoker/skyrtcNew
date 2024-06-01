@@ -1,0 +1,22 @@
+{
+  "name": "skyrtcnew",
+  "version": "1.0.0",
+  "description": "new version",
+  "main": "SkyRTC.js",
+  "keywords": [
+    "skyrtcnew"
+  ],
+  "dependencies": {
+      "ws": ">= 8.17.0",
+      "uuid": ">= 9.0.1",
+      "express": ">= 4.19.2"
+  },
+  "repository": {
+      "type": "git",
+      "url": "git@github.com:omniscientjoker/skyrtcNew.git"
+  },
+  "readmeFilename": "README.md",
+  "homepage": "https://github.com/omniscientjoker/skyrtcNew",
+  "author": "tryent",
+  "license": "ISC"
+}

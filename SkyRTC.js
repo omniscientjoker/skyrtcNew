@@ -1,7 +1,7 @@
-var WebSocketServer = require('ws').Server;
-var UUID = require('uuid');
-var events = require('events');
-var util = require('util');
+import { Server as WebSocketServer } from 'ws';
+import { v4 } from 'uuid';
+import { EventEmitter } from 'events';
+import { inherits } from 'util';
 var errorCb = function(rtc) {
 	return function(error) {
 		if (error) {
@@ -31,9 +31,7 @@ function SkyRTC() {
 			ids.push(curSocket.id);
 			curSocket.send(JSON.stringify({
 				"eventName": "_new_peer",
-				"data": {
-					"socketId": socket.id
-				}
+				"data": {"socketId": socket.id}
 			}), errorCb);
 		}
 
@@ -98,15 +96,14 @@ function SkyRTC() {
 	});
 }
 
-util.inherits(SkyRTC, events.EventEmitter);
+inherits(SkyRTC, EventEmitter);
 
 SkyRTC.prototype.addSocket = function(socket) {
 	this.sockets.push(socket);
 };
 
 SkyRTC.prototype.removeSocket = function(socket) {
-	var i = this.sockets.indexOf(socket),
-		room = socket.room;
+	var i = this.sockets.indexOf(socket), room = socket.room;
 	this.sockets.splice(i, 1);
 	if (room) {
 		i = this.rooms[room].indexOf(socket);
@@ -125,8 +122,7 @@ SkyRTC.prototype.broadcast = function(data, errorCb) {
 };
 
 SkyRTC.prototype.broadcastInRoom = function(room, data, errorCb) {
-	var curRoom = this.rooms[room],
-		i;
+	var i, curRoom = this.rooms[room];
 	if (curRoom) {
 		for (i = curRoom.length; i--;) {
 			curRoom[i].send(data, errorCb);
@@ -135,8 +131,7 @@ SkyRTC.prototype.broadcastInRoom = function(room, data, errorCb) {
 };
 
 SkyRTC.prototype.getRooms = function() {
-	var rooms = [],
-		room;
+	var room , rooms = [];
 	for (room in this.rooms) {
 		rooms.push(room);
 	}
@@ -144,8 +139,7 @@ SkyRTC.prototype.getRooms = function() {
 };
 
 SkyRTC.prototype.getSocket = function(id) {
-	var i,
-		curSocket;
+	var i, curSocket;
 	if (!this.sockets) {
 		return;
 	}
@@ -160,11 +154,12 @@ SkyRTC.prototype.getSocket = function(id) {
 
 SkyRTC.prototype.init = function(socket) {
 	var that = this;
-	socket.id = UUID.v4();
+	socket.id = v4();
 	that.addSocket(socket);
 	//为新连接绑定事件处理器
 	socket.on('message', function(data) {
 		var json = JSON.parse(data);
+		console.log(json)
 		if (json.eventName) {
 			that.emit(json.eventName, json.data, socket);
 		} else {
@@ -173,9 +168,7 @@ SkyRTC.prototype.init = function(socket) {
 	});
 	//连接关闭后从SkyRTC实例中移除连接，并通知其他连接
 	socket.on('close', function() {
-		var i, m,
-			room = socket.room,
-			curRoom;
+		var i,  room = socket.room, curRoom;
 		if (room) {
 			curRoom = that.rooms[room];
 			for (i = curRoom.length; i--;) {
@@ -184,21 +177,17 @@ SkyRTC.prototype.init = function(socket) {
 				}
 				curRoom[i].send(JSON.stringify({
 					"eventName": "_remove_peer",
-					"data": {
-						"socketId": socket.id
-					}
+					"data": {"socketId": socket.id}
 				}), errorCb);
 			}
 		}
-
 		that.removeSocket(socket);
-
 		that.emit('remove_peer', socket.id, that);
 	});
 	that.emit('new_connect', socket);
 };
 
-module.exports.listen = function(server) {
+export function listen(server) {
 	var SkyRTCServer;
 	if (typeof server === 'number') {
 		SkyRTCServer = new WebSocketServer({
@@ -209,12 +198,10 @@ module.exports.listen = function(server) {
 			server: server
 		});
 	}
-
 	SkyRTCServer.rtc = new SkyRTC();
 	errorCb = errorCb(SkyRTCServer.rtc);
 	SkyRTCServer.on('connection', function(socket) {
 		this.rtc.init(socket);
 	});
-
 	return SkyRTCServer;
-};
+}

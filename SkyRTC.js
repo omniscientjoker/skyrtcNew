@@ -51,7 +51,6 @@ function SkyRTC() {
 
 	this.on('__ice_candidate', function(data, socket) {
 		var soc = this.getSocket(data.socketId);
-
 		if (soc) {
 			soc.send(JSON.stringify({
 				"eventName": "_ice_candidate",
@@ -61,14 +60,12 @@ function SkyRTC() {
 					"socketId": socket.id
 				}
 			}), errorCb);
-
 			this.emit('ice_candidate', socket, data);
 		}
 	});
 
 	this.on('__offer', function(data, socket) {
 		var soc = this.getSocket(data.socketId);
-
 		if (soc) {
 			soc.send(JSON.stringify({
 				"eventName": "_offer",
@@ -125,6 +122,8 @@ SkyRTC.prototype.broadcastInRoom = function(room, data, errorCb) {
 	var i, curRoom = this.rooms[room];
 	if (curRoom) {
 		for (i = curRoom.length; i--;) {
+			console.log('roomname : ' + curRoom);
+			console.log('message : ' + data);
 			curRoom[i].send(data, errorCb);
 		}
 	}

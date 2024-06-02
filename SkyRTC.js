@@ -1,7 +1,8 @@
-import { Server as WebSocketServer } from 'ws';
-import { v4 } from 'uuid';
-import { EventEmitter } from 'events';
-import { inherits } from 'util';
+var WebSocketServer = require('ws').Server;
+var UUID = require('uuid');
+var events = require('events');
+var util = require('util');
+
 var errorCb = function(rtc) {
 	return function(error) {
 		if (error) {
@@ -93,7 +94,7 @@ function SkyRTC() {
 	});
 }
 
-inherits(SkyRTC, EventEmitter);
+util.inherits(SkyRTC, events.EventEmitter);
 
 SkyRTC.prototype.addSocket = function(socket) {
 	this.sockets.push(socket);
@@ -153,7 +154,7 @@ SkyRTC.prototype.getSocket = function(id) {
 
 SkyRTC.prototype.init = function(socket) {
 	var that = this;
-	socket.id = v4();
+	socket.id = UUID.v4();
 	that.addSocket(socket);
 	//为新连接绑定事件处理器
 	socket.on('message', function(data) {
@@ -186,7 +187,7 @@ SkyRTC.prototype.init = function(socket) {
 	that.emit('new_connect', socket);
 };
 
-export function listen(server) {
+module.exports.listen = function listen(server) {
 	var SkyRTCServer;
 	if (typeof server === 'number') {
 		SkyRTCServer = new WebSocketServer({
